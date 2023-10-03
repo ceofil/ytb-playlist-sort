@@ -1,18 +1,23 @@
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('sortByDurationButton').addEventListener('click', function () {
+function addOnClick(elementId, func, args){
+    document.getElementById(elementId).addEventListener('click', function () {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const activeTab = tabs[0];
             chrome.scripting.executeScript({
                 target: { tabId: activeTab.id },
-                function: sortByDuration
+                function: func,
+                args: args
             });
         });
     });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    addOnClick("sortByDurationButtonAscending", sortByDuration, [1])
+    addOnClick("sortByDurationButtonDescending", sortByDuration, [-1])
 });
 
 
-
-function sortByDuration(){
+function sortByDuration(order){
     var textToSeconds = (text) => {
         const timeParts = text.split(":").reverse();
         let unitToSeconds = 1;
@@ -56,7 +61,7 @@ function sortByDuration(){
             node: node,
             duration: textToSeconds(node.querySelector(query).innerHTML)
         }
-    }).sort((a, b) => b.duration - a.duration)
+    }).sort((a, b) => (a.duration - b.duration)*order)
 
     const parent = videos[0].node.parentNode;
     while (parent.firstChild) {
