@@ -13,11 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 function sortByDuration(){
-    const className = "ytd-thumbnail-overlay-time-status-renderer" 
-    const id = "text"
-    const query = `.${className}#${id}`
-    let nodes = document.querySelectorAll(query);
-
     var textToSeconds = (text) => {
         const timeParts = text.split(":").reverse();
         let unitToSeconds = 1;
@@ -44,34 +39,31 @@ function sortByDuration(){
 
     // this could be achieved by hardcoding the xpath
     var findChildrenOfTheLowestCommonAncestor = (nodes) => {
-        while (!nodesHaveTheSameParent(nodes.map(n => n["node"]))){
-            for(let node of nodes){
-                node["node"] = node["node"].parentNode
-            }
+        while (!nodesHaveTheSameParent(nodes)){
+            nodes = nodes.map(node => node.parentNode)
         }
         return nodes;
     }
 
-    nodes = Array.prototype.map.call(
-        nodes, 
-        node => {
-            return {
-                "duration": textToSeconds(node.innerHTML),
-                "node": node,
-            }
-        }
-    );
-
+    const query = `.ytd-thumbnail-overlay-time-status-renderer#text`
+    let nodes = Array.from(document.querySelectorAll(query));
+    if (nodes.length == 0){
+        return;
+    }
     nodes = findChildrenOfTheLowestCommonAncestor(nodes)
-    nodes.sort((a, b) => b.duration - a.duration);
+    videos = nodes.map(node => {
+        return {
+            node: node,
+            duration: textToSeconds(node.querySelector(query).innerHTML)
+        }
+    }).sort((a, b) => b.duration - a.duration)
 
-
-    let parent = nodes[0]["node"].parentNode;
+    const parent = videos[0].node.parentNode;
     while (parent.firstChild) {
         parent.removeChild(parent.firstChild);
     }
-    for (let node of nodes) {
-        parent.appendChild(node["node"]);
+    for (let video of videos) {
+        parent.appendChild(video.node);
     }
 }
 
