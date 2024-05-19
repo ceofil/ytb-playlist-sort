@@ -3,7 +3,10 @@ console.log("hello world", new Date().getSeconds())
 const PLAYLIST_VIDEO_ELEMENT_TAG = "ytd-playlist-video-renderer"
 const MENU_CLASS_NAME = "metadata-wrapper style-scope ytd-playlist-header-renderer"
 const DURATION_CLASS_NAME = "badge-shape-wiz__text"
+const ASC_ORDER = 1
+const DESC_ORDER = -1
 
+let globalSortingOrder = ASC_ORDER
 
 function getVideoDurationInSeconds(playlistVideo){
     const durationTextElement = playlistVideo.querySelector("." + DURATION_CLASS_NAME)
@@ -24,9 +27,27 @@ function getVideoElements(){
     return Array.from(document.getElementsByTagName(PLAYLIST_VIDEO_ELEMENT_TAG))
 }
 
-function sortVideos(){
+function sortVideos(order){
+    console.log("sort videos", order)
     let videos = getVideoElements()
-    //TODO
+    const videosParent = videos[0].parentNode
+
+    let videosWithDuration = videos.map(video => {
+        return {
+            video: video, 
+            duration: getVideoDurationInSeconds(video)
+        }
+    })
+    videosWithDuration.sort((a,b) => (a.duration - b.duration) * order)
+
+    while(videosParent.firstChild){
+        videosParent.removeChild(videosParent.firstChild)
+    }
+
+    for(let videoWithDuration of videosWithDuration){
+        videosParent.appendChild(videoWithDuration.video)
+    }
+
 }
 
 function getTotalDuration(){
@@ -45,7 +66,10 @@ function addMenuElements(){
     
     const btn = document.createElement("button")
     btn.innerHTML = "Sort videos"
-    btn.onclick = sortVideos 
+    btn.onclick = () => { 
+        sortVideos(globalSortingOrder)
+        globalSortingOrder *= -1
+    } 
     menu.appendChild(btn)
 
     const h = document.createElement("h1")
@@ -55,8 +79,8 @@ function addMenuElements(){
 }
 
 function main(){
-    sortVideos()
     addMenuElements()
+    // sortVideos()
 }
 
 // TODO: this should be an event
