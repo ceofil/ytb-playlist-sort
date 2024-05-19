@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Borderify",
+  "name": "ytb-playlist-sort",
   "version": "1.0",
 
-  "description": "Adds a red border to all webpages matching mozilla.org.",
+  "description": "Sorts youtube playlists based on duration",
 
   "icons": {
     "48": "icons/border-48.png"
